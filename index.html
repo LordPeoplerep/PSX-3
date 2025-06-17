@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PSX - Peoplerep Stock Exchange</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f0f2f5; padding: 20px; }
+    h1 { color: #222; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+    th, td { padding: 12px; border: 1px solid #ccc; text-align: left; }
+    th { background-color: #e0e0e0; }
+    input[type="text"], input[type="number"] {
+      padding: 6px; width: 100%; box-sizing: border-box;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Peoplerep Stock Exchange (PSX)</h1>
+  <p>Currency: ₽ (Russian Rubles)</p>
+
+  <table id="stockTable">
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Company</th>
+        <th>Price (₽)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-price="1000.00">
+        <td>PRC</td>
+        <td>Peoplerep Corp</td>
+        <td class="price">₽ 1,000.00</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Add a Company</h3>
+  <form onsubmit="addStock(event)">
+    <input type="text" id="symbol" placeholder="Symbol (e.g., ABC)" required><br><br>
+    <input type="text" id="name" placeholder="Company Name" required><br><br>
+    <input type="number" id="price" step="0.01" placeholder="Initial Price in ₽" required><br><br>
+    <button type="submit">Add Company</button>
+  </form>
+
+  <script>
+    function formatPrice(price) {
+      return '₽ ' + Number(price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Random walk update: +/- up to 2% each interval
+    function updatePrices() {
+      const rows = document.querySelectorAll('#stockTable tbody tr');
+      rows.forEach(row => {
+        let price = parseFloat(row.getAttribute('data-price'));
+        const changeFactor = 1 + (Math.random() - 0.5) * 0.04; // ±2%
+        price = Math.max(0.01, price * changeFactor);
+        row.setAttribute('data-price', price.toFixed(2));
+        row.querySelector('.price').textContent = formatPrice(price.toFixed(2));
+      });
+    }
+
+    function addStock(event) {
+      event.preventDefault();
+      const symbol = document.getElementById('symbol').value.toUpperCase();
+      const name = document.getElementById('name').value;
+      const priceInput = parseFloat(document.getElementById('price').value);
+
+      const tbody = document.querySelector('#stockTable tbody');
+      const row = document.createElement('tr');
+      row.setAttribute('data-price', priceInput.toFixed(2));
+      row.innerHTML = `
+        <td>${symbol}</td>
+        <td>${name}</td>
+        <td class="price">${formatPrice(priceInput)}</td>
+      `;
+      tbody.appendChild(row);
+
+      document.getElementById('symbol').value = '';
+      document.getElementById('name').value = '';
+      document.getElementById('price').value = '';
+    }
+
+    // Start auto-update every 5 seconds
+    setInterval(updatePrices, 5000);
+  </script>
+</body>
+</html>
